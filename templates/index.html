@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comic Craft - AI Comic Story Creator</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #fef08a 0%, #dcfce7 100%); margin: 0; padding: 20px; min-height: 100vh; }
+        .container { max-width: 900px; margin: 20px auto; background: white; padding: 35px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 4px solid #4ade80; }
+        h1 { color: #166534; text-align: center; }
+        .subtitle { color: #475569; text-align: center; margin-bottom: 25px; }
+        textarea { width: 100%; height: 100px; border: 2px solid #cbd5e1; border-radius: 12px; padding: 12px; font-size: 16px; resize: none; box-sizing: border-box; }
+        .btn-box { display: flex; gap: 15px; margin-top: 15px; }
+        button { flex: 1; background: #22c55e; color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; }
+        .comic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 35px; display: none; }
+        .comic-panel { background: #fff; border: 4px solid #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 6px 6px 0px #1e293b; display: flex; flex-direction: column; justify-content: space-between; }
+        .panel-title { background: #1e293b; color: white; padding: 6px; font-weight: bold; text-align: center; }
+        .comic-img-box { width: 100%; aspect-ratio: 4/3; background: #e2e8f0; }
+        .comic-img { width: 100%; height: 100%; object-fit: cover; }
+        .dialogue-box { background: #f8fafc; padding: 15px; text-align: center; font-style: italic; border-top: 2px dashed #cbd5e1; }
+        #loading { display: none; text-align: center; font-weight: bold; color: #15803d; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎨 Comic Craft</h1>
+    <div class="subtitle">AI Comic Story Creator using Gemini Models</div>
+    <textarea id="promptInput" placeholder="Enter a prompt..."></textarea>
+    <div class="btn-box">
+        <button onclick="buildComic()">🚀 Generate Comic Book</button>
+    </div>
+    <div id="loading">⏳ Generating Comic...</div>
+    <div class="comic-grid" id="comicGrid">
+        <div class="comic-panel"><div class="panel-title" id="p1-title">Panel 1</div><div class="comic-img-box"><img id="p1-img" class="comic-img" src="https://unsplash.com"></div><div class="dialogue-box" id="p1-txt"></div></div>
+        <div class="comic-panel"><div class="panel-title" id="p2-title">Panel 2</div><div class="comic-img-box"><img id="p2-img" class="comic-img" src="https://unsplash.com"></div><div class="dialogue-box" id="p2-txt"></div></div>
+        <div class="comic-panel"><div class="panel-title" id="p3-title">Panel 3</div><div class="comic-img-box"><img id="p3-img" class="comic-img" src="https://unsplash.com"></div><div class="dialogue-box" id="p3-txt"></div></div>
+        <div class="comic-panel"><div class="panel-title" id="p4-title">Panel 4</div><div class="comic-img-box"><img id="p4-img" class="comic-img" src="https://unsplash.com"></div><div class="dialogue-box" id="p4-txt"></div></div>
+    </div>
+</div>
+<script>
+async function buildComic() {
+    const prompt = document.getElementById('promptInput').value;
+    const grid = document.getElementById('comicGrid');
+    const loading = document.getElementById('loading');
+    if(!prompt) { alert("Please type a prompt!"); return; }
+    loading.style.display = "block"; grid.style.display = "none";
+    try {
+        const response = await fetch('/generate-story', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prompt }) });
+        const data = await response.json();
+        if(data.comic && data.comic.length === 4) {
+            for(let i=0; i<4; i++) {
+                document.getElementById(`p${i+1}-title`).innerText = data.comic[i].panel;
+                document.getElementById(`p${i+1}-txt`).innerText = data.comic[i].dialogue;
+            }
+            loading.style.display = "none"; grid.style.display = "grid";
+        }
+    } catch (error) { loading.style.display = "none"; }
+}
+</script>
+</body>
+</html>
